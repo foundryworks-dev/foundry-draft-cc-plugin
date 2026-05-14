@@ -1,0 +1,14 @@
+{
+  "name": "foundry-plugins",
+  "description": "Claude Code plugins from Foundry — tools for working with the Foundry product suite.",
+  "owner": {
+    "name": "Foundry"
+  },
+  "plugins": [
+    {
+      "name": "draft",
+      "source": "./",
+      "description": "Connects a Claude Code session to a Foundry/Draft workspace — surfaces the agent queue and runs the ticket-working loop."
+    }
+  ]
+}

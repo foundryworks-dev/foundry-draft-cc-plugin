@@ -27,18 +27,35 @@ a plugin update.
 
 ## Install
 
-For local development, point Claude Code at the plugin directory:
+This repo is its own Claude Code marketplace. Add it once, then
+install the plugin from it:
+
+```
+/plugin marketplace add PlayFrameStudios/foundry-draft-cc-plugin
+/plugin install draft@foundry-plugins
+```
+
+To update later, after a new version is published:
+
+```
+/plugin update draft@foundry-plugins
+```
+
+**Requirement:** the MCP server is a Node script — Node 18+ must be on
+`PATH` (it uses the built-in `fetch`). There are **no npm
+dependencies** and no build step; the server runs straight from
+source.
+
+### Local development
+
+To hack on the plugin itself, point Claude Code at the working copy
+instead of installing from the marketplace:
 
 ```bash
 claude --plugin-dir /path/to/draft-cc-plugin
 ```
 
 After editing plugin files mid-session, reload with `/reload-plugins`.
-
-**Requirement:** the MCP server is a Node script — Node 18+ must be on
-`PATH` (it uses the built-in `fetch`). There are **no npm
-dependencies** and no build step; the server runs straight from
-source.
 
 ## Configure
 
