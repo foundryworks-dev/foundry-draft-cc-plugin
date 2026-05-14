@@ -31,7 +31,7 @@ This repo is its own Claude Code marketplace. Add it once, then
 install the plugin from it:
 
 ```
-/plugin marketplace add PlayFrameStudios/foundry-draft-cc-plugin
+/plugin marketplace add foundryworks-dev/foundry-draft-cc-plugin
 /plugin install draft@foundry-plugins
 ```
 

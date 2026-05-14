@@ -5,8 +5,8 @@
   "author": {
     "name": "Foundry"
   },
-  "homepage": "https://github.com/PlayFrameStudios/foundry-draft-cc-plugin",
-  "repository": "https://github.com/PlayFrameStudios/foundry-draft-cc-plugin",
+  "homepage": "https://github.com/foundryworks-dev/foundry-draft-cc-plugin",
+  "repository": "https://github.com/foundryworks-dev/foundry-draft-cc-plugin",
   "license": "MIT",
   "keywords": ["foundry", "draft", "project-management", "agent", "tickets"],
   "mcpServers": {
