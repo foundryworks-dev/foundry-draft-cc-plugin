@@ -71,6 +71,32 @@ Get an API key from your Draft workspace under **Settings → Agents**.
 Both the session-start hook and the MCP server read the same two
 variables.
 
+## Permissions
+
+The first time Claude Code calls one of the `mcp__draft__*` tools
+it asks you to approve it. To make the prompts go away:
+
+- **One-click** — when Claude Code prompts, choose **Always allow**.
+  It persists the rule to your `~/.claude/settings.json` and future
+  calls go through silently.
+- **Pre-set** — paste this into `~/.claude/settings.json` before the
+  first call:
+
+  ```json
+  {
+    "permissions": {
+      "allow": ["mcp__draft__*"]
+    }
+  }
+  ```
+
+The plugin can't ship this allowlist itself: Claude Code
+deliberately separates plugin trust (installation) from tool-call
+policy (permissions), and plugin-bundled `settings.json` doesn't
+accept a `permissions` block. The plugin gives you the MCP server;
+allowing it to fire without asking each time is a one-time choice
+you make.
+
 ## MCP tools
 
 The bundled `draft` MCP server (`mcp/draft-mcp.js`) exposes:
