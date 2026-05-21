@@ -25,10 +25,13 @@ A Foundry/Draft connection is available in this session (DRAFT_API_KEY
 is set; workspace API: ${API_URL}).
 
 - \`/draft:queue\` — show what work is waiting (read-only).
-- \`/draft:work\`  — start working tickets from the queue.
+- \`/draft:work\`  — drain the queue once, then stop.
+- \`/draft:watch\` — drain the queue, then poll for new work in a
+  loop (default 5-minute interval). Use this when the operator
+  wants to walk away and come back to delivered stories.
 
 Do not start working tickets unprompted — wait for the user to invoke
-\`/draft:work\` or ask for it. The authoritative instructions for
-operating within Draft are served by the API and fetched by those
-commands; they are not duplicated here.
+one of those commands or ask for it. The authoritative instructions
+for operating within Draft are served by the API and fetched by
+those commands; they are not duplicated here.
 EOF

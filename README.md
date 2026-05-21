@@ -14,7 +14,12 @@ can see the work queue and pick up tickets.
   (read-only).
 - **`/draft:work`** — work the queue: claim the top story, implement
   it, and finish it, following the workflow instructions Draft serves
-  over its API.
+  over its API. Stops when the queue empties.
+- **`/draft:watch`** — same as `/draft:work`, but instead of stopping
+  when the queue empties it sleeps (default 5 min) and re-checks
+  until new work arrives or you interrupt. Set-and-forget — invoke
+  once, walk away, come back to delivered stories. Pass an argument
+  to override the interval, e.g. `/draft:watch 60`.
 - **`mcp__draft__*` tools** — a bundled MCP server exposes the Draft
   API as typed tools (`queue`, `context`, `claim_story`,
   `transition_story`, `comment`, …). The commands above drive the
@@ -129,7 +134,8 @@ hooks/hooks.json             SessionStart hook wiring
 scripts/session-init.sh      the hook script (silent unless DRAFT_API_KEY is set)
 mcp/draft-mcp.js             zero-dependency MCP server wrapping the Draft API
 skills/queue/SKILL.md        /draft:queue  — read-only queue view
-skills/work/SKILL.md         /draft:work   — the ticket-working loop
+skills/work/SKILL.md         /draft:work   — drain the queue once
+skills/watch/SKILL.md        /draft:watch  — drain + poll for new work
 ```
 
 ## License
