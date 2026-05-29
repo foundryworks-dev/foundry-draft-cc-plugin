@@ -126,6 +126,25 @@ directly and uses Node's global `fetch`. One upside of going through
 the server instead of raw `curl` — Node's resolver handles DNS, so
 there's no `--resolve` fiddling when records are in flux.
 
+### Auto-tracked token spend per story
+
+`claim_story` and `transition_story` quietly maintain a per-session
+snapshot of the cumulative Anthropic token total (sum of
+`input_tokens` + `output_tokens` + `cache_read_input_tokens` +
+`cache_creation_input_tokens`) drawn straight from the Claude Code
+session's transcript. On `transition_story` with `action: "finish"`
+the diff since claim is PATCHed onto the story as `agent_tokens_used`
+— the field Draft's story modal renders to show what each AI-
+completed story actually cost. `restart` re-seeds the snapshot so
+the next finish reports only post-restart spend; `block` / `unblock`
+leave it alone so a story that finishes after a block-then-unblock
+cycle still captures total spend since the original claim. Snapshots
+live in `~/.claude/foundry-draft-plugin/<session-id>.json` and are
+dropped on a successful finish. The whole path is best-effort and
+silent: outside Claude Code (no transcript file findable) every
+step short-circuits to a no-op, and a failed PATCH at finish is
+logged to stderr but doesn't block the actual transition.
+
 ## Layout
 
 ```
