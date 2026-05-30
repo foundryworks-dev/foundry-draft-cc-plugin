@@ -1,7 +1,7 @@
 {
   "name": "draft",
   "description": "Connects a Claude Code session to a Foundry/Draft workspace — surfaces the agent queue and runs the ticket-working loop.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": {
     "name": "Foundry"
   },
