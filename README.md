@@ -20,6 +20,11 @@ can see the work queue and pick up tickets.
   until new work arrives or you interrupt. Set-and-forget — invoke
   once, walk away, come back to delivered stories. Pass an argument
   to override the interval, e.g. `/draft:watch 60`.
+- **`/draft:refresh`** — re-fetch Draft's authoritative operating
+  instructions (the workspace context) from the API and adopt them as
+  canonical for the rest of the session (read-only). Handy for a
+  long-running session when the workflow rules may have changed
+  server-side.
 - **`mcp__draft__*` tools** — a bundled MCP server exposes the Draft
   API as typed tools (`queue`, `context`, `claim_story`,
   `transition_story`, `comment`, …). The commands above drive the
@@ -152,9 +157,10 @@ logged to stderr but doesn't block the actual transition.
 hooks/hooks.json             SessionStart hook wiring
 scripts/session-init.sh      the hook script (silent unless DRAFT_API_KEY is set)
 mcp/draft-mcp.js             zero-dependency MCP server wrapping the Draft API
-skills/queue/SKILL.md        /draft:queue  — read-only queue view
-skills/work/SKILL.md         /draft:work   — drain the queue once
-skills/watch/SKILL.md        /draft:watch  — drain + poll for new work
+skills/queue/SKILL.md        /draft:queue   — read-only queue view
+skills/work/SKILL.md         /draft:work    — drain the queue once
+skills/watch/SKILL.md        /draft:watch   — drain + poll for new work
+skills/refresh/SKILL.md      /draft:refresh — re-pull the workflow context
 ```
 
 ## License
