@@ -150,12 +150,30 @@ silent: outside Claude Code (no transcript file findable) every
 step short-circuits to a no-op, and a failed PATCH at finish is
 logged to stderr but doesn't block the actual transition.
 
+### Token-spend safety net (Stop hook)
+
+The auto-tracking above only fires when `claim_story` / `transition_story`
+mediate the work. If an agent drives Draft through the **REST API**
+directly — a pure-REST client, or a session whose MCP server dropped and
+fell back to `curl` — those tools never run and the story records 0
+tokens. A `Stop` hook closes that gap: after each turn it launches
+`scripts/reconcile-tokens.sh` (detached, so it never adds turn latency),
+which finds the agent's finished/delivered stories that still have a null
+`agent_tokens_used` and backfills them by time-windowing the current
+session's transcript over each story's `started → finished` interval (the
+same input + output + cache token definition used above). It only
+attributes work visible in this session's transcript, self-dedupes rapid
+runs, and is fully best-effort — silent and harmless when `DRAFT_API_KEY`
+isn't set. (Codex and Hermes have no equivalent Stop-hook mechanism, so
+this safety net is Claude-Code-specific for now.)
+
 ## Layout
 
 ```
 .claude-plugin/plugin.json   plugin manifest (declares the MCP server)
-hooks/hooks.json             SessionStart hook wiring
-scripts/session-init.sh      the hook script (silent unless DRAFT_API_KEY is set)
+hooks/hooks.json             SessionStart + Stop hook wiring
+scripts/session-init.sh      SessionStart script (silent unless DRAFT_API_KEY is set)
+scripts/reconcile-tokens.sh  Stop hook — launches the token-spend reconciler
 mcp/draft-mcp.js             zero-dependency MCP server wrapping the Draft API
 skills/queue/SKILL.md        /draft:queue   — read-only queue view
 skills/work/SKILL.md         /draft:work    — drain the queue once
