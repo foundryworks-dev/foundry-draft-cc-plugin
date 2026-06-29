@@ -29,6 +29,9 @@ is set; workspace API: ${API_URL}).
 - \`/draft:watch\` — drain the queue, then poll for new work in a
   loop (default 5-minute interval). Use this when the operator
   wants to walk away and come back to delivered stories.
+- \`/draft:refresh\` — re-fetch the workspace's authoritative
+  operating instructions from the API and adopt them as canonical
+  (read-only). Use when the workflow rules may have changed.
 
 Do not start working tickets unprompted — wait for the user to invoke
 one of those commands or ask for it. The authoritative instructions
