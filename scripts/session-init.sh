@@ -14,7 +14,22 @@
 set -uo pipefail
 
 if [ -z "${DRAFT_API_KEY:-}" ]; then
-  # Not a Draft-connected session — say nothing at all.
+  # No explicit key. If the Foundry Agent Registry daemon is running, the
+  # operator can pick + claim an agent key from it instead (#194) — advertise
+  # that path. Otherwise stay completely silent (repo isn't Draft-connected).
+  FOUNDRY_ROOT="${FOUNDRY_HOME:-$HOME/.foundry}"
+  if [ -f "$FOUNDRY_ROOT/daemon.json" ]; then
+    cat <<EOF
+A Foundry Agent Registry daemon is running, but no DRAFT_API_KEY is set.
+
+- \`/draft:agents\` — pick an agent key from the registry and claim it for
+  this session. Then use \`/draft:queue\` / \`/draft:work\` / \`/draft:watch\`
+  as that agent.
+
+(If you'd rather key the session directly, export DRAFT_API_KEY and the
+registry step is skipped entirely.)
+EOF
+  fi
   exit 0
 fi
 

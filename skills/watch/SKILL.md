@@ -18,8 +18,13 @@ drive everything below.
 
 Same env as `/draft:work`:
 
-- `DRAFT_API_KEY` (required) — the workspace agent API key. If a tool
-  call reports it's unset, tell the user to export it and stop.
+- `DRAFT_API_KEY` — the workspace agent API key. If it's not set in the
+  environment, resolve it from the registry: run
+  `node "${CLAUDE_PLUGIN_ROOT}/scripts/foundry-registry.js" resolve`, which
+  prints `DRAFT_API_KEY<TAB>DRAFT_API_URL` (the env value if set, otherwise a
+  lease claimed via `/draft:agents`) — use that for the REST calls. If it exits
+  non-zero (no key set and nothing claimed), tell the user to run
+  `/draft:agents` or export `DRAFT_API_KEY`, and stop.
 - `DRAFT_API_URL` (optional) — defaults to
   `https://draft.foundryworks.dev`.
 
