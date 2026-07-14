@@ -38,11 +38,13 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/foundry-registry.js" status
 node "${CLAUDE_PLUGIN_ROOT}/scripts/foundry-registry.js" keys
 ```
 
-This prints the keys grouped by project, each marked **available** or **in
-use** (with who holds it), env-tagged, and with `[PROD]` flagged. Present this
-list to the operator clearly and ask which agent they want to work as. Only
-`available` keys can be claimed — if they pick one that's in use, say so and
-re-ask. Be extra explicit when a choice is `[PROD]`.
+This prints a table of the keys with a **Cross-Project** column (a ✓ means the
+agent is registered at the workspace level and works across every project) and
+a **Project** column (the team name when the agent is scoped to one project),
+plus availability (**available** / **in use**, with who holds it), env, and a
+`[PROD]` flag. Present this to the operator clearly and ask which agent they
+want to work as. Only `available` keys can be claimed — if they pick one that's
+in use, say so and re-ask. Be extra explicit when a choice is `[PROD]`.
 
 ## 3. Claim the chosen key
 
