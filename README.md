@@ -125,6 +125,7 @@ The bundled `draft` MCP server (`mcp/draft-mcp.js`) exposes:
 | `add_link`          | Attach a PR/commit URL to a story.                              |
 | `create_story`      | File a new story (lands in the backlog for triage).             |
 | `update_story`      | Patch arbitrary story fields (points, labels, …).               |
+| `library_write`     | Create or update a Library wiki page by (project, slug).        |
 
 The server is dependency-free: it implements the MCP stdio transport
 directly and uses Node's global `fetch`. One upside of going through
