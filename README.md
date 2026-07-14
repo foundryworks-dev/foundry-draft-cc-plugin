@@ -28,8 +28,9 @@ can see the work queue and pick up tickets.
 - **`/draft:agents`** — pick an agent key from the **Foundry Agent
   Registry** instead of exporting one by hand. When the local `foundry
   daemon` is running and `DRAFT_API_KEY` is unset, this lists the keys
-  you may lease (grouped by project, marked available / in use), you
-  choose one, and the plugin claims it through the daemon for the
+  you may lease in a table — a Cross-Project column (workspace-level
+  agents) and a Project column (project-scoped agents), plus
+  availability — you choose one, and the plugin claims it for the
   session. The other commands then operate as that agent. If
   `DRAFT_API_KEY` is already set, the registry flow is skipped entirely
   and the plugin behaves exactly as before. See "Agent Key Registry"
