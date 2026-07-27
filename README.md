@@ -6,7 +6,7 @@ can see the work queue and pick up tickets.
 
 ## What it does
 
-- **On session start** — if `DRAFT_API_KEY` is set in the environment,
+- **On session start** — if `FOUNDRY_API_KEY` is set in the environment,
   the plugin quietly notes that Draft is connected and lists the
   available commands. Sessions without the key see nothing; the plugin
   is inert.
@@ -27,12 +27,12 @@ can see the work queue and pick up tickets.
   server-side.
 - **`/draft:agents`** — pick an agent key from the **Foundry Agent
   Registry** instead of exporting one by hand. When the local `foundry
-  daemon` is running and `DRAFT_API_KEY` is unset, this lists the keys
+  daemon` is running and `FOUNDRY_API_KEY` is unset, this lists the keys
   you may lease in a table — a Cross-Project column (workspace-level
   agents) and a Project column (project-scoped agents), plus
   availability — you choose one, and the plugin claims it for the
   session. The other commands then operate as that agent. If
-  `DRAFT_API_KEY` is already set, the registry flow is skipped entirely
+  `FOUNDRY_API_KEY` is already set, the registry flow is skipped entirely
   and the plugin behaves exactly as before. See "Agent Key Registry"
   below.
 - **`mcp__draft__*` tools** — a bundled MCP server exposes the Draft
@@ -84,8 +84,13 @@ Set these in your environment — your shell profile, or a project
 
 | Variable        | Required | Default                          | Purpose                                     |
 | --------------- | -------- | -------------------------------- | ------------------------------------------- |
-| `DRAFT_API_KEY` | yes      | —                                | Your workspace agent API key (`fdrk_…`).    |
-| `DRAFT_API_URL` | no       | `https://draft.foundryworks.dev` | Override for a self-hosted Draft instance.  |
+| `FOUNDRY_API_KEY` | yes      | —                                | Your workspace agent API key (`fdrk_…`).    |
+| `FOUNDRY_API_URL` | no       | `https://draft.foundryworks.dev` | Override for a self-hosted Draft instance.  |
+
+**The `DRAFT_API_KEY` / `DRAFT_API_URL` names are still accepted** and are
+not going away. `FOUNDRY_*` wins when both are set; otherwise `DRAFT_*` is
+used and the plugin prints a one-line notice on stderr. Existing setups need
+no change (#456).
 
 Get an API key from your Draft workspace under **Settings → Agents**.
 Both the session-start hook and the MCP server read the same two
@@ -174,19 +179,19 @@ which finds the agent's finished/delivered stories that still have a null
 session's transcript over each story's `started → finished` interval (the
 same input + output + cache token definition used above). It only
 attributes work visible in this session's transcript, self-dedupes rapid
-runs, and is fully best-effort — silent and harmless when `DRAFT_API_KEY`
+runs, and is fully best-effort — silent and harmless when `FOUNDRY_API_KEY`
 isn't set. (Codex and Hermes have no equivalent Stop-hook mechanism, so
 this safety net is Claude-Code-specific for now.)
 
 ## Agent Key Registry (`/draft:agents`)
 
-Instead of exporting a `DRAFT_API_KEY` by hand, you can run the **Foundry
+Instead of exporting a `FOUNDRY_API_KEY` by hand, you can run the **Foundry
 Agent Registry** daemon (`foundry daemon`, a separate resident local
 process) and let it broker keys to your agents. It holds your Foundry login
 and owns the server-side lease calls; the plugin only talks to its local
 loopback IPC — it never sees an operator token.
 
-Flow: with the daemon running and `DRAFT_API_KEY` **unset**, `/draft:agents`
+Flow: with the daemon running and `FOUNDRY_API_KEY` **unset**, `/draft:agents`
 lists the keys you may lease (grouped by project, marked available / in use,
 `[PROD]` flagged), you pick one, and the plugin claims it. The claim records
 a session-local lease (`~/.foundry/active-lease.json`, honoring
@@ -195,7 +200,7 @@ the credential from that lease and operate as the claimed agent. The daemon
 auto-heartbeats the lease; a `SessionEnd` hook releases it on exit (and the
 server's idle auto-release is the backstop).
 
-**Backward compatible:** if `DRAFT_API_KEY` is set in the environment, the
+**Backward compatible:** if `FOUNDRY_API_KEY` is set in the environment, the
 registry flow is skipped entirely — everything works exactly as before.
 
 The broker client is `scripts/foundry-registry.js` (Node, zero-dependency),
@@ -208,7 +213,7 @@ daemon itself.
 ```
 .claude-plugin/plugin.json   plugin manifest (declares the MCP server)
 hooks/hooks.json             SessionStart + Stop + SessionEnd hook wiring
-scripts/session-init.sh      SessionStart script (silent unless DRAFT_API_KEY or a daemon is present)
+scripts/session-init.sh      SessionStart script (silent unless FOUNDRY_API_KEY or a daemon is present)
 scripts/session-end.sh       SessionEnd hook — releases a claimed registry lease
 scripts/reconcile-tokens.sh  Stop hook — launches the token-spend reconciler
 scripts/foundry-registry.js  Agent Key Registry broker client (talks to the local daemon)

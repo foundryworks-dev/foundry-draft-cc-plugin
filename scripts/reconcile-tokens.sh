@@ -8,11 +8,11 @@
 # server dropped mid-session). It self-dedupes rapid runs and is fully
 # best-effort.
 #
-# Stays completely silent unless DRAFT_API_KEY is set — zero noise in sessions
+# Stays completely silent unless a workspace key is set — zero noise in sessions
 # whose repo isn't connected to a Draft workspace.
 set -uo pipefail
 
-if [ -z "${DRAFT_API_KEY:-}" ]; then
+if [ -z "${FOUNDRY_API_KEY:-${DRAFT_API_KEY:-}}" ]; then
   exit 0
 fi
 

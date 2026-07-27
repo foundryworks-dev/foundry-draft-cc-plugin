@@ -24,10 +24,17 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
-const API_URL = (
-  process.env.DRAFT_API_URL || "https://draft.foundryworks.dev"
-).replace(/\/+$/, "");
-const API_KEY = process.env.DRAFT_API_KEY || "";
+// FOUNDRY_* wins → else the legacy DRAFT_* name → else the default (#456).
+// No notice here: this runs as a background hook alongside the MCP server,
+// which already says it once per process.
+const envOr = (suffix, fallback) =>
+  process.env[`FOUNDRY_${suffix}`] || process.env[`DRAFT_${suffix}`] || fallback;
+
+const API_URL = envOr("API_URL", "https://draft.foundryworks.dev").replace(
+  /\/+$/,
+  "",
+);
+const API_KEY = envOr("API_KEY", "");
 const SESSION_ID = process.env.CLAUDE_CODE_SESSION_ID || "";
 const STATE_DIR = path.join(os.homedir(), ".claude", "foundry-draft-plugin");
 // Dedupe overlapping runs from rapid turns: skip if a run started within this

@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 # SessionStart hook for the Foundry/Draft plugin.
 #
-# Stays completely silent unless DRAFT_API_KEY is set in the
+# Stays completely silent unless a workspace key is set in the
 # environment — so it adds zero noise to sessions whose repo isn't
 # connected to a Draft workspace. When the key IS present, it injects
 # a short notice that the /draft commands are available.
+#
+# FOUNDRY_API_KEY / FOUNDRY_API_URL are the current names; the DRAFT_*
+# ones are still honored and are not going away (#456).
 #
 # It deliberately does NOT fetch the queue or the workflow
 # instructions here. That work belongs in the /draft:queue and
@@ -13,31 +16,33 @@
 # portable — no jq / python dependency.
 set -uo pipefail
 
-if [ -z "${DRAFT_API_KEY:-}" ]; then
+API_KEY="${FOUNDRY_API_KEY:-${DRAFT_API_KEY:-}}"
+
+if [ -z "$API_KEY" ]; then
   # No explicit key. If the Foundry Agent Registry daemon is running, the
   # operator can pick + claim an agent key from it instead (#194) — advertise
   # that path. Otherwise stay completely silent (repo isn't Draft-connected).
   FOUNDRY_ROOT="${FOUNDRY_HOME:-$HOME/.foundry}"
   if [ -f "$FOUNDRY_ROOT/daemon.json" ]; then
     cat <<EOF
-A Foundry Agent Registry daemon is running, but no DRAFT_API_KEY is set.
+A Foundry Agent Registry daemon is running, but no FOUNDRY_API_KEY is set.
 
 - \`/draft:agents\` — pick an agent key from the registry and claim it for
   this session. Then use \`/draft:queue\` / \`/draft:work\` / \`/draft:watch\`
   as that agent.
 
-(If you'd rather key the session directly, export DRAFT_API_KEY and the
-registry step is skipped entirely.)
+(If you'd rather key the session directly, export FOUNDRY_API_KEY and the
+registry step is skipped entirely. The legacy DRAFT_API_KEY also works.)
 EOF
   fi
   exit 0
 fi
 
-API_URL="${DRAFT_API_URL:-https://draft.foundryworks.dev}"
+API_URL="${FOUNDRY_API_URL:-${DRAFT_API_URL:-https://draft.foundryworks.dev}}"
 
 cat <<EOF
-A Foundry/Draft connection is available in this session (DRAFT_API_KEY
-is set; workspace API: ${API_URL}).
+A Foundry/Draft connection is available in this session (a workspace
+API key is set; workspace API: ${API_URL}).
 
 - \`/draft:queue\` — show what work is waiting (read-only).
 - \`/draft:work\`  — drain the queue once, then stop.
