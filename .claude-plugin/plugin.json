@@ -10,6 +10,10 @@
   "license": "MIT",
   "keywords": ["foundry", "draft", "project-management", "agent", "tickets"],
   "mcpServers": {
+    "foundry": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/draft-mcp.js"]
+    },
     "draft": {
       "command": "node",
       "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/draft-mcp.js"]
