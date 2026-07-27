@@ -26,7 +26,7 @@ Same env as `/draft:work`:
   non-zero (no key set and nothing claimed), tell the user to run
   `/draft:agents` or export `FOUNDRY_API_KEY`, and stop.
 - `FOUNDRY_API_URL` (optional) — defaults to
-  `https://draft.foundryworks.dev`.
+  `https://app.foundryworks.dev`.
 
 ## 1. Load the workflow instructions — first, every time
 
