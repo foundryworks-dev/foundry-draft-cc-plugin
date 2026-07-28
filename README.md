@@ -10,22 +10,22 @@ can see the work queue and pick up tickets.
   the plugin quietly notes that Draft is connected and lists the
   available commands. Sessions without the key see nothing; the plugin
   is inert.
-- **`/draft:queue`** — show the stories waiting in your agent queue
+- **`/foundry:queue`** — show the stories waiting in your agent queue
   (read-only).
-- **`/draft:work`** — work the queue: claim the top story, implement
+- **`/foundry:work`** — work the queue: claim the top story, implement
   it, and finish it, following the workflow instructions Draft serves
   over its API. Stops when the queue empties.
-- **`/draft:watch`** — same as `/draft:work`, but instead of stopping
+- **`/foundry:watch`** — same as `/foundry:work`, but instead of stopping
   when the queue empties it sleeps (default 5 min) and re-checks
   until new work arrives or you interrupt. Set-and-forget — invoke
   once, walk away, come back to delivered stories. Pass an argument
-  to override the interval, e.g. `/draft:watch 60`.
-- **`/draft:refresh`** — re-fetch Draft's authoritative operating
+  to override the interval, e.g. `/foundry:watch 60`.
+- **`/foundry:refresh`** — re-fetch Draft's authoritative operating
   instructions (the workspace context) from the API and adopt them as
   canonical for the rest of the session (read-only). Handy for a
   long-running session when the workflow rules may have changed
   server-side.
-- **`/draft:agents`** — pick an agent key from the **Foundry Agent
+- **`/foundry:agents`** — pick an agent key from the **Foundry Agent
   Registry** instead of exporting one by hand. When the local `foundry
   daemon` is running and `FOUNDRY_API_KEY` is unset, this lists the keys
   you may lease in a table — a Cross-Project column (workspace-level
@@ -35,13 +35,13 @@ can see the work queue and pick up tickets.
   `FOUNDRY_API_KEY` is already set, the registry flow is skipped entirely
   and the plugin behaves exactly as before. See "Agent Key Registry"
   below.
-- **`mcp__draft__*` tools** — a bundled MCP server exposes the Draft
+- **`mcp__foundry__*` tools** — a bundled MCP server exposes the Draft
   API as typed tools (`queue`, `context`, `claim_story`,
   `transition_story`, `comment`, …). The commands above drive the
   loop through these tools.
 
 The plugin does **not** hardcode how Draft works. It fetches the
-workflow (`mcp__draft__context` → `GET /v1/agent/context`) from your
+workflow (`mcp__foundry__context` → `GET /v1/agent/context`) from your
 workspace at run time, so the protocol can evolve server-side without
 a plugin update.
 
@@ -52,14 +52,39 @@ install the plugin from it:
 
 ```
 /plugin marketplace add foundryworks-dev/foundry-draft-cc-plugin
-/plugin install draft@foundry-plugins
+/plugin install foundry@foundry-plugins
 ```
 
 To update later, after a new version is published:
 
 ```
-/plugin update draft@foundry-plugins
+/plugin update foundry@foundry-plugins
 ```
+
+### Upgrading from `draft@foundry-plugins`
+
+The plugin was named `draft` before 0.9.0, which is where the old
+`/draft:queue` / `/draft:work` commands came from. It is now `foundry`,
+and the commands are `/foundry:queue`, `/foundry:work`, and so on.
+
+You do not need to do anything special. The marketplace carries a
+`renames` entry, so Claude Code migrates an existing install for you:
+it loads the plugin under the new name, prints a one-line
+`Renamed to "foundry"` notice, and rewrites the old key in your
+settings. Two cases need one manual step:
+
+- Because this marketplace is a git source, Claude Code may report
+  `plugin-cache-miss` after the rename. Run
+  `/plugin install foundry@foundry-plugins` once to fetch it under the
+  new name.
+- Automatic migration needs Claude Code **v2.1.193 or later**. Older
+  versions ignore `renames` and report `plugin-not-found` for `draft`;
+  install under the new name once and you are current.
+
+Only the *commands* moved. The `mcp__draft__*` tool namespace still
+resolves (see [Tool names](#tool-names-foundry-and-draft)), as do
+`DRAFT_API_KEY` / `DRAFT_API_URL` and the `draft.foundryworks.dev`
+host.
 
 **Requirement:** the MCP server is a Node script — Node 18+ must be on
 `PATH` (it uses the built-in `fetch`). There are **no npm
@@ -72,7 +97,7 @@ To hack on the plugin itself, point Claude Code at the working copy
 instead of installing from the marketplace:
 
 ```bash
-claude --plugin-dir /path/to/draft-cc-plugin
+claude --plugin-dir /path/to/foundry-draft-cc-plugin
 ```
 
 After editing plugin files mid-session, reload with `/reload-plugins`.
@@ -131,7 +156,7 @@ at all is sent by a session already on `FOUNDRY_*` and `mcp__foundry__*`.
 
 ## Permissions
 
-The first time Claude Code calls one of the `mcp__draft__*` tools
+The first time Claude Code calls one of the `mcp__foundry__*` tools
 it asks you to approve it. To make the prompts go away:
 
 - **One-click** — when Claude Code prompts, choose **Always allow**.
@@ -143,7 +168,7 @@ it asks you to approve it. To make the prompts go away:
   ```json
   {
     "permissions": {
-      "allow": ["mcp__draft__*"]
+      "allow": ["mcp__foundry__*"]
     }
   }
   ```
@@ -157,7 +182,7 @@ you make.
 
 ## MCP tools
 
-The bundled `draft` MCP server (`mcp/draft-mcp.js`) exposes:
+The bundled `foundry` MCP server (`mcp/draft-mcp.js`) exposes:
 
 | Tool                | What it does                                                    |
 | ------------------- | --------------------------------------------------------------- |
@@ -216,7 +241,7 @@ runs, and is fully best-effort — silent and harmless when `FOUNDRY_API_KEY`
 isn't set. (Codex and Hermes have no equivalent Stop-hook mechanism, so
 this safety net is Claude-Code-specific for now.)
 
-## Agent Key Registry (`/draft:agents`)
+## Agent Key Registry (`/foundry:agents`)
 
 Instead of exporting a `FOUNDRY_API_KEY` by hand, you can run the **Foundry
 Agent Registry** daemon (`foundry daemon`, a separate resident local
@@ -224,11 +249,11 @@ process) and let it broker keys to your agents. It holds your Foundry login
 and owns the server-side lease calls; the plugin only talks to its local
 loopback IPC — it never sees an operator token.
 
-Flow: with the daemon running and `FOUNDRY_API_KEY` **unset**, `/draft:agents`
+Flow: with the daemon running and `FOUNDRY_API_KEY` **unset**, `/foundry:agents`
 lists the keys you may lease (grouped by project, marked available / in use,
 `[PROD]` flagged), you pick one, and the plugin claims it. The claim records
 a session-local lease (`~/.foundry/active-lease.json`, honoring
-`$FOUNDRY_HOME`); `/draft:queue` / `/draft:work` / `/draft:watch` then resolve
+`$FOUNDRY_HOME`); `/foundry:queue` / `/foundry:work` / `/foundry:watch` then resolve
 the credential from that lease and operate as the claimed agent. The daemon
 auto-heartbeats the lease; a `SessionEnd` hook releases it on exit (and the
 server's idle auto-release is the backstop).
@@ -251,11 +276,11 @@ scripts/session-end.sh       SessionEnd hook — releases a claimed registry lea
 scripts/reconcile-tokens.sh  Stop hook — launches the token-spend reconciler
 scripts/foundry-registry.js  Agent Key Registry broker client (talks to the local daemon)
 mcp/draft-mcp.js             zero-dependency MCP server wrapping the Draft API
-skills/queue/SKILL.md        /draft:queue   — read-only queue view
-skills/work/SKILL.md         /draft:work    — drain the queue once
-skills/watch/SKILL.md        /draft:watch   — drain + poll for new work
-skills/refresh/SKILL.md      /draft:refresh — re-pull the workflow context
-skills/agents/SKILL.md       /draft:agents  — pick + claim a key from the registry
+skills/queue/SKILL.md        /foundry:queue   — read-only queue view
+skills/work/SKILL.md         /foundry:work    — drain the queue once
+skills/watch/SKILL.md        /foundry:watch   — drain + poll for new work
+skills/refresh/SKILL.md      /foundry:refresh — re-pull the workflow context
+skills/agents/SKILL.md       /foundry:agents  — pick + claim a key from the registry
 ```
 
 ## License

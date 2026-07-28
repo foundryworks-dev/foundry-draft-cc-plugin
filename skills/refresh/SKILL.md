@@ -5,7 +5,7 @@ description: Re-fetch Foundry/Draft's authoritative operating instructions (the 
 # Refresh the Draft workflow context
 
 Force a fresh pull of Draft's authoritative operating instructions from
-the API, using the `draft` MCP tools (`mcp__draft__*`) bundled with this
+the API, using the `foundry` MCP tools (`mcp__foundry__*`) bundled with this
 plugin. The instructions live server-side and **can change**, so this is
 how you re-ground a session on the latest rules without restarting it.
 
@@ -23,14 +23,14 @@ The MCP server reads its config from the environment:
 
 ## Steps
 
-1. Call `mcp__draft__context`. It re-fetches Draft's own authoritative
+1. Call `mcp__foundry__context`. It re-fetches Draft's own authoritative
    instructions for operating within the workspace (the board model,
    the story state machine, claim/start/comment/transition/finish
    mechanics, the @-mention format, hand-off protocol, and any
    workspace- or project-specific notes) straight from the API.
 2. **Adopt the freshly returned text as canonical**, replacing any
    earlier understanding from this session — including anything cached
-   from a previous `/draft:work`, `/draft:watch`, or `/draft:refresh`
+   from a previous `/foundry:work`, `/foundry:watch`, or `/foundry:refresh`
    call. If the new context conflicts with what you were doing, the new
    context wins.
 3. Briefly tell the user what (if anything) changed since you last
@@ -40,7 +40,7 @@ The MCP server reads its config from the environment:
 ## Notes
 
 - This does **not** start or continue working the queue. To do that,
-  run `/draft:work` (which loads the context itself before working) or
-  `/draft:watch`.
-- The `mcp__draft__context` response is always canonical: if anything in
+  run `/foundry:work` (which loads the context itself before working) or
+  `/foundry:watch`.
+- The `mcp__foundry__context` response is always canonical: if anything in
   the plugin's skill files conflicts with it, the API wins.
