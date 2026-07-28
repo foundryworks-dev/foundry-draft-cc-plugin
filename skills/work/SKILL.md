@@ -12,14 +12,14 @@ MCP tools (`mcp__draft__*`) bundled with this plugin.
 
 The MCP server reads its config from the environment:
 
-- `DRAFT_API_KEY` — the workspace agent API key. If it's not set in the
+- `FOUNDRY_API_KEY` — the workspace agent API key. If it's not set in the
   environment, resolve it from the registry: run
   `node "${CLAUDE_PLUGIN_ROOT}/scripts/foundry-registry.js" resolve`, which
-  prints `DRAFT_API_KEY<TAB>DRAFT_API_URL` (the env value if set, otherwise a
+  prints `FOUNDRY_API_KEY<TAB>FOUNDRY_API_URL` (the env value if set, otherwise a
   lease claimed via `/draft:agents`) — use that for the REST calls. If it exits
   non-zero (no key set and nothing claimed), tell the user to run
-  `/draft:agents` or export `DRAFT_API_KEY`, and stop.
-- `DRAFT_API_URL` (optional) — defaults to
+  `/draft:agents` or export `FOUNDRY_API_KEY`, and stop.
+- `FOUNDRY_API_URL` (optional) — defaults to
   `https://draft.foundryworks.dev`.
 
 ## 1. Load the workflow instructions — first, every time
@@ -72,5 +72,5 @@ expected or needs a decision you can't make.
   explaining what you need) rather than abandoning it.
 - The MCP tools are the intended interface. If they're somehow
   unavailable in the session, the same operations are plain REST
-  calls against `DRAFT_API_URL` with an
-  `Authorization: Bearer $DRAFT_API_KEY` header — but prefer the tools.
+  calls against `FOUNDRY_API_URL` with an
+  `Authorization: Bearer $FOUNDRY_API_KEY` header — but prefer the tools.

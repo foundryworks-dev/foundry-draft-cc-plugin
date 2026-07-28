@@ -1,15 +1,15 @@
 ---
-description: Pick and claim an agent key from the local Foundry Agent Registry daemon, instead of being handed a DRAFT_API_KEY by hand. Lists the agents/keys you may lease grouped by project, you choose one, and the plugin claims it for this session.
+description: Pick and claim an agent key from the local Foundry Agent Registry daemon, instead of being handed a FOUNDRY_API_KEY by hand. Lists the agents/keys you may lease grouped by project, you choose one, and the plugin claims it for this session.
 ---
 
 # Pick an agent from the registry
 
-Use this when `DRAFT_API_KEY` is **not** already set and you're running the
+Use this when `FOUNDRY_API_KEY` is **not** already set and you're running the
 Foundry Agent Registry daemon (`foundry daemon`). It lets the operator pick
 which agent identity this session should work as, and claims that key through
 the daemon — no key is pasted by hand.
 
-If `DRAFT_API_KEY` **is** already set in the environment, the registry flow is
+If `FOUNDRY_API_KEY` **is** already set in the environment, the registry flow is
 unnecessary: this session is already keyed, and `/draft:work` / `/draft:watch`
 work directly. Say so and stop.
 
@@ -57,7 +57,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/foundry-registry.js" claim <key_id> \
 ```
 
 - Exit 0 → the key is claimed. The daemon returns the lease token (used as this
-  session's `DRAFT_API_KEY`) and the API base URL; the broker records them in
+  session's `FOUNDRY_API_KEY`) and the API base URL; the broker records them in
   `~/.foundry/active-lease.json` (honoring `$FOUNDRY_HOME`) for the rest of the
   session, and auto-heartbeats the lease. Tell the operator which agent + env
   they're now working as.
@@ -73,8 +73,8 @@ claimed agent: they resolve the credential with
 node "${CLAUDE_PLUGIN_ROOT}/scripts/foundry-registry.js" resolve
 ```
 
-which prints `DRAFT_API_KEY<TAB>DRAFT_API_URL` — the environment's
-`DRAFT_API_KEY` if set (backward compatible), otherwise the claimed lease. Use
+which prints `FOUNDRY_API_KEY<TAB>FOUNDRY_API_URL` — the environment's
+`FOUNDRY_API_KEY` if set (backward compatible), otherwise the claimed lease. Use
 that credential for the Draft REST calls.
 
 ## Lifecycle notes
