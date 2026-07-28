@@ -12,11 +12,14 @@
   "mcpServers": {
     "foundry": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/draft-mcp.js"]
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp/draft-mcp.js",
+        "--server-key=foundry"
+      ]
     },
     "draft": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/draft-mcp.js"]
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/draft-mcp.js", "--server-key=draft"]
     }
   }
 }
