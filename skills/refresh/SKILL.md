@@ -19,7 +19,7 @@ The MCP server reads its config from the environment:
 - `FOUNDRY_API_KEY` (required) — the workspace agent API key. If a tool
   call reports it's unset, tell the user to export it and stop.
 - `FOUNDRY_API_URL` (optional) — defaults to
-  `https://draft.foundryworks.dev`.
+  `https://app.foundryworks.dev`.
 
 ## Steps
 

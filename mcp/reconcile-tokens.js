@@ -30,7 +30,7 @@ const path = require("path");
 const envOr = (suffix, fallback) =>
   process.env[`FOUNDRY_${suffix}`] || process.env[`DRAFT_${suffix}`] || fallback;
 
-const API_URL = envOr("API_URL", "https://draft.foundryworks.dev").replace(
+const API_URL = envOr("API_URL", "https://app.foundryworks.dev").replace(
   /\/+$/,
   "",
 );

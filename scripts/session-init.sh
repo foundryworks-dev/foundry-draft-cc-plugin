@@ -38,7 +38,7 @@ EOF
   exit 0
 fi
 
-API_URL="${FOUNDRY_API_URL:-${DRAFT_API_URL:-https://draft.foundryworks.dev}}"
+API_URL="${FOUNDRY_API_URL:-${DRAFT_API_URL:-https://app.foundryworks.dev}}"
 
 cat <<EOF
 A Foundry/Draft connection is available in this session (a workspace
