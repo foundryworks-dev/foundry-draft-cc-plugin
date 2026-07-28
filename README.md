@@ -97,7 +97,7 @@ To hack on the plugin itself, point Claude Code at the working copy
 instead of installing from the marketplace:
 
 ```bash
-claude --plugin-dir /path/to/draft-cc-plugin
+claude --plugin-dir /path/to/foundry-draft-cc-plugin
 ```
 
 After editing plugin files mid-session, reload with `/reload-plugins`.
