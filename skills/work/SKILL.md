@@ -5,8 +5,8 @@ disable-model-invocation: true
 
 # Work the Draft queue
 
-Run the Foundry/Draft agent loop for this session, using the `draft`
-MCP tools (`mcp__draft__*`) bundled with this plugin.
+Run the Foundry/Draft agent loop for this session, using the `foundry`
+MCP tools (`mcp__foundry__*`) bundled with this plugin.
 
 ## Configuration
 
@@ -16,15 +16,15 @@ The MCP server reads its config from the environment:
   environment, resolve it from the registry: run
   `node "${CLAUDE_PLUGIN_ROOT}/scripts/foundry-registry.js" resolve`, which
   prints `FOUNDRY_API_KEY<TAB>FOUNDRY_API_URL` (the env value if set, otherwise a
-  lease claimed via `/draft:agents`) — use that for the REST calls. If it exits
+  lease claimed via `/foundry:agents`) — use that for the REST calls. If it exits
   non-zero (no key set and nothing claimed), tell the user to run
-  `/draft:agents` or export `FOUNDRY_API_KEY`, and stop.
+  `/foundry:agents` or export `FOUNDRY_API_KEY`, and stop.
 - `FOUNDRY_API_URL` (optional) — defaults to
   `https://app.foundryworks.dev`.
 
 ## 1. Load the workflow instructions — first, every time
 
-Call `mcp__draft__context`. It returns Draft's own authoritative
+Call `mcp__foundry__context`. It returns Draft's own authoritative
 instructions for operating within a workspace: the board model, the
 story state machine, claim/start/comment/transition/finish mechanics,
 and any workspace- or project-specific notes. **Those instructions
@@ -33,21 +33,21 @@ so fetch them fresh each run rather than relying on memory.
 
 ## 2. Work the queue
 
-Call `mcp__draft__queue` and take the highest-priority item (the
+Call `mcp__foundry__queue` and take the highest-priority item (the
 context explains the ordering). Then drive it to completion with the
 matching tools, exactly as the context instructions describe:
 
-- `mcp__draft__claim_story` — claim ownership (resolves your own user
+- `mcp__foundry__claim_story` — claim ownership (resolves your own user
   id for you).
-- `mcp__draft__transition_story` with `action: "start"`.
-- `mcp__draft__comment` — post a short plan comment.
+- `mcp__foundry__transition_story` with `action: "start"`.
+- `mcp__foundry__comment` — post a short plan comment.
 - Do the implementation. Run the project's tests / build.
-- `mcp__draft__add_link` — attach the PR or commit URL if the project
+- `mcp__foundry__add_link` — attach the PR or commit URL if the project
   has a connected repo.
-- `mcp__draft__transition_story` with `action: "finish"`.
+- `mcp__foundry__transition_story` with `action: "finish"`.
 
-`mcp__draft__get_story`, `mcp__draft__list_comments`, and
-`mcp__draft__story_activity` are there for reading detail along the
+`mcp__foundry__get_story`, `mcp__foundry__list_comments`, and
+`mcp__foundry__story_activity` are there for reading detail along the
 way — e.g. check for reviewer replies before you finish.
 
 If `$ARGUMENTS` names a specific story number, pick that up instead of
@@ -55,14 +55,14 @@ the top of the queue.
 
 ## 3. Repeat or stop
 
-When `mcp__draft__queue` shows no available work, say so and stop.
+When `mcp__foundry__queue` shows no available work, say so and stop.
 Otherwise continue to the next item — but check in with the user
 rather than looping indefinitely if a story turns out far larger than
 expected or needs a decision you can't make.
 
 ## Guardrails
 
-- The `mcp__draft__context` response is canonical. If anything in this
+- The `mcp__foundry__context` response is canonical. If anything in this
   file conflicts with it, the API wins.
 - Never transition a story to `accepted` — that's the human reviewer's
   call. `finish` is the right terminal state for agent work.

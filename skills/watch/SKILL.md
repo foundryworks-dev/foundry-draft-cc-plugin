@@ -1,36 +1,36 @@
 ---
-description: Work the Foundry/Draft agent queue and keep polling for new work when the queue empties. The "set it and forget it" variant of /draft:work — invoke once at the start of a session, walk away, come back to delivered stories.
+description: Work the Foundry/Draft agent queue and keep polling for new work when the queue empties. The "set it and forget it" variant of /foundry:work — invoke once at the start of a session, walk away, come back to delivered stories.
 disable-model-invocation: true
 ---
 
 # Watch the Draft queue
 
-Same as `/draft:work`, but instead of stopping when the queue is
+Same as `/foundry:work`, but instead of stopping when the queue is
 empty, sleep and re-check until either new work arrives or the user
 interrupts. Use this when the operator wants the agent to run
 unattended for a stretch — they kick off a session, walk away, and
 come back to delivered stories.
 
-The `draft` MCP tools (`mcp__draft__*`) bundled with this plugin
+The `foundry` MCP tools (`mcp__foundry__*`) bundled with this plugin
 drive everything below.
 
 ## Configuration
 
-Same env as `/draft:work`:
+Same env as `/foundry:work`:
 
 - `FOUNDRY_API_KEY` — the workspace agent API key. If it's not set in the
   environment, resolve it from the registry: run
   `node "${CLAUDE_PLUGIN_ROOT}/scripts/foundry-registry.js" resolve`, which
   prints `FOUNDRY_API_KEY<TAB>FOUNDRY_API_URL` (the env value if set, otherwise a
-  lease claimed via `/draft:agents`) — use that for the REST calls. If it exits
+  lease claimed via `/foundry:agents`) — use that for the REST calls. If it exits
   non-zero (no key set and nothing claimed), tell the user to run
-  `/draft:agents` or export `FOUNDRY_API_KEY`, and stop.
+  `/foundry:agents` or export `FOUNDRY_API_KEY`, and stop.
 - `FOUNDRY_API_URL` (optional) — defaults to
   `https://app.foundryworks.dev`.
 
 ## 1. Load the workflow instructions — first, every time
 
-Call `mcp__draft__context`. It returns Draft's own authoritative
+Call `mcp__foundry__context`. It returns Draft's own authoritative
 instructions for operating within a workspace (state machine, claim
 mechanics, comment + transition flow, hand-off protocol, mention
 format, etc.). **Those instructions are the source of truth** —
@@ -38,23 +38,23 @@ follow them. Fetch fresh each run rather than relying on memory.
 
 ## 2. Drain the queue
 
-Call `mcp__draft__queue` and work each available item to completion
+Call `mcp__foundry__queue` and work each available item to completion
 using the MCP tools, exactly as the context instructions describe:
 
-- `mcp__draft__claim_story` — claim ownership.
-- `mcp__draft__transition_story` with `action: "start"`.
-- `mcp__draft__comment` — post a short plan comment.
+- `mcp__foundry__claim_story` — claim ownership.
+- `mcp__foundry__transition_story` with `action: "start"`.
+- `mcp__foundry__comment` — post a short plan comment.
 - Do the implementation. Run the project's tests / build.
-- `mcp__draft__add_link` — attach the PR or commit URL if the
+- `mcp__foundry__add_link` — attach the PR or commit URL if the
   project has a connected repo.
-- `mcp__draft__transition_story` with `action: "finish"`.
+- `mcp__foundry__transition_story` with `action: "finish"`.
 
 Repeat for each available item in priority order. The watch loop
-runs the same per-story flow as `/draft:work` — only step 3 differs.
+runs the same per-story flow as `/foundry:work` — only step 3 differs.
 
 ## 3. When the queue empties — poll, don't stop
 
-Once `mcp__draft__queue` reports no available work:
+Once `mcp__foundry__queue` reports no available work:
 
 1. Print one line: `Queue empty — watching for new work. Sleeping
    5 minutes before next check. Interrupt with Esc / Ctrl-C to
@@ -63,7 +63,7 @@ Once `mcp__draft__queue` reports no available work:
    360000 (6 minutes — Bash's default 2-minute timeout would cut
    the sleep short). Use `run_in_background: false` so the loop
    advances when the sleep completes.
-3. Call `mcp__draft__queue` again.
+3. Call `mcp__foundry__queue` again.
    - If there are stories, drop back to **step 2** and drain them.
    - If still empty, repeat the sleep + re-check. There is no
      hardcoded stopping condition — the user ends the watch by
@@ -76,7 +76,7 @@ day).
 
 ## Guardrails
 
-- The `mcp__draft__context` response is canonical. If anything in
+- The `mcp__foundry__context` response is canonical. If anything in
   this file conflicts with it, the API wins.
 - Never transition a story to `accepted` — that's the human
   reviewer's call. `finish` is the right terminal state for agent

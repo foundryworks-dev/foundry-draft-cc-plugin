@@ -10,7 +10,7 @@ which agent identity this session should work as, and claims that key through
 the daemon — no key is pasted by hand.
 
 If `FOUNDRY_API_KEY` **is** already set in the environment, the registry flow is
-unnecessary: this session is already keyed, and `/draft:work` / `/draft:watch`
+unnecessary: this session is already keyed, and `/foundry:work` / `/foundry:watch`
 work directly. Say so and stop.
 
 The broker client is `${CLAUDE_PLUGIN_ROOT}/scripts/foundry-registry.js` (Node);
@@ -66,7 +66,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/foundry-registry.js" claim <key_id> \
 
 ## 4. Proceed with the normal flow
 
-Once claimed, `/draft:queue`, `/draft:work`, and `/draft:watch` operate as the
+Once claimed, `/foundry:queue`, `/foundry:work`, and `/foundry:watch` operate as the
 claimed agent: they resolve the credential with
 
 ```
