@@ -476,6 +476,61 @@ const idArgs = {
   },
 };
 
+// summarizeQueue trims a queue response to the fields an agent uses to
+// DECIDE, dropping the ones it only needs after deciding.
+//
+// 🔴 The full payload has blown the MCP token limit twice on a busy project
+// (72KB, then 79KB), forcing a spill-to-file-then-jq workaround. That
+// workaround is also where the "control characters break jq" report came
+// from: the characters do not reproduce, but the silent truncation was real
+// and it entered through the pipeline this payload size forces. Removing the
+// need for the pipeline removes the truncation with it — which is why the
+// fix here is a smaller payload and NOT a control-character sanitiser.
+//
+// Descriptions are the bulk of it and are the one field you can always fetch
+// for the single story you are about to take, via get_story.
+//
+// Unknown collections are passed through summarized rather than dropped:
+// /v1/agent/queue has grown a key before (attention, #373) and will again
+// (surveys, #623), and a summarizer that silently omits what it does not
+// recognise is how a new key becomes invisible to every agent.
+function summarizeQueue(data) {
+  if (!data || typeof data !== "object") return data;
+  const one = (s) => {
+    if (!s || typeof s !== "object") return s;
+    const out = {
+      number: s.number,
+      project_id: s.project_id,
+      type: s.type,
+      title: s.title,
+      state: s.state,
+      points: s.points,
+      owner_id: s.owner_id,
+      column_kind: s.column_kind,
+      position: s.position,
+      labels: s.labels,
+    };
+    // Say that a description exists and how big it is, rather than pretending
+    // the story has none. An agent that cannot see the field at all has no
+    // reason to go and read it.
+    if (typeof s.description === "string" && s.description.length > 0) {
+      out.description_chars = s.description.length;
+    }
+    for (const k of Object.keys(out)) {
+      if (out[k] === undefined) delete out[k];
+    }
+    return out;
+  };
+  const out = {};
+  for (const [key, value] of Object.entries(data)) {
+    out[key] = Array.isArray(value) ? value.map(one) : value;
+  }
+  out._summary =
+    "Summarized: descriptions omitted (see description_chars). " +
+    "Use get_story for the one you are taking, or queue({full:true}) for everything.";
+  return out;
+}
+
 const TOOLS = [
   {
     name: "whoami",
@@ -494,9 +549,22 @@ const TOOLS = [
   {
     name: "queue",
     description:
-      "List the agent work queue across every reachable project — stories marked ready_for_agent that you're eligible for, current iteration first (lower position = higher priority).",
-    inputSchema: { type: "object", properties: {} },
-    run: () => api("GET", "/v1/agent/queue"),
+      "List the agent work queue across every reachable project — stories marked ready_for_agent that you're eligible for, current iteration first (lower position = higher priority). Returns a compact summary by default: number, project, state, owner, points and title, which is what you need to choose what to take. Pass full:true only when you genuinely need every field of every row — descriptions are large, and a busy project's full queue does not fit in a tool result.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        full: {
+          type: "boolean",
+          description:
+            "Return complete story objects instead of the summary. Rarely needed — fetch the one story you are about to take with get_story instead, which is a smaller read than the whole queue.",
+        },
+      },
+    },
+    run: async (a) => {
+      const data = await api("GET", "/v1/agent/queue");
+      if (a && a.full) return data;
+      return summarizeQueue(data);
+    },
   },
   {
     name: "get_story",
@@ -698,7 +766,7 @@ const TOOLS = [
   {
     name: "library_write",
     description:
-      "Create or update a Library wiki page by (project, slug). Upsert: creates the page if the slug is new, otherwise appends a new revision. Body is HTML (sanitized server-side); the agent-friendly (L2) and agent-optimized (L3) representations are derived automatically. Requires the project's agents_can_edit_library setting to be enabled.",
+      "Create or update a Library wiki page by (project, slug). Upsert: creates the page if the slug is new, otherwise appends a new revision. Body is RAW HTML — send <p>text</p>, never &lt;p&gt;text&lt;/p&gt;. Entity-escaped markup is stored verbatim and the page renders as literal source, which has happened. It is sanitized server-side, so you do not need to escape it yourself. The agent-friendly (L2) and agent-optimized (L3) representations are derived automatically. Requires the project's agents_can_edit_library setting to be enabled.",
     inputSchema: {
       type: "object",
       properties: {
@@ -715,7 +783,8 @@ const TOOLS = [
         title: { type: "string", description: "Page title." },
         body: {
           type: "string",
-          description: "Page body as HTML; sanitized server-side.",
+          description:
+            "Page body as RAW HTML — <p>text</p>, not &lt;p&gt;text&lt;/p&gt;. Escaped markup is stored as-is and renders as visible source. Sanitized server-side, so send it unescaped.",
         },
         change_summary: {
           type: "string",
