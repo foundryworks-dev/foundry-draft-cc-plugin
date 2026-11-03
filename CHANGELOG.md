@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.10.1
+
+- **Handoffs report token spend (#660).** `update_story` with a patch that
+  hands the story to someone else (`owner_id` set to another user or null, or
+  `unset: ["owner_id"]`) now includes your spend since claim in that same
+  PATCH, the way `finish` does. Before this, only `finish` reported, so an
+  agent that handed a story on (a PM or Architect lane) was never credited.
+  The server files it under the caller's own row (#540). Assigning a story to
+  yourself, or a patch that sets token fields explicitly, is sent unchanged.
+- `scripts/test-handoff-tokens.js`, run in CI.
+
 ## 0.10.0
 
 - **Craft apps (EP-19, #666).** Five new tools: `craft_tools`, `craft_open`,

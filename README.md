@@ -236,9 +236,13 @@ the diff since claim is PATCHed onto the story as `agent_tokens_used`
 completed story actually cost. `restart` re-seeds the snapshot so
 the next finish reports only post-restart spend; `block` / `unblock`
 leave it alone so a story that finishes after a block-then-unblock
-cycle still captures total spend since the original claim. Snapshots
-live in `~/.claude/foundry-draft-plugin/<session-id>.json` and are
-dropped on a successful finish. The whole path is best-effort and
+cycle still captures total spend since the original claim. A
+**handoff** reports too (#660): `update_story` with a patch that moves
+`owner_id` to anyone else (another agent, or null) carries the same
+diff in that same PATCH, so a PM or Architect lane that hands a story
+on is credited rather than silently dropped. Snapshots live in
+`~/.claude/foundry-draft-plugin/<session-id>.json` and are dropped on a
+successful finish or handoff. The whole path is best-effort and
 silent: outside Claude Code (no transcript file findable) every
 step short-circuits to a no-op, and a failed PATCH at finish is
 logged to stderr but doesn't block the actual transition.
